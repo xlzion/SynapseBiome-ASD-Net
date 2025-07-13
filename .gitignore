@@ -1,0 +1,8 @@
+*.pth
+*.nii.gz
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+biomarkers_results/
+*.png
+*.csv 
