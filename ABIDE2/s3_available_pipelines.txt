@@ -1,4 +1,0 @@
-data/Projects/ABIDE2/Outputs/denoise/
-data/Projects/ABIDE2/Outputs/fmriprep/
-data/Projects/ABIDE2/Outputs/mindboggle_swf/
-data/Projects/ABIDE2/Outputs/mriqc/

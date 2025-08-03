@@ -1,0 +1,150 @@
+# Data Configuration for SynapseBiome ASD-Net
+
+# Dataset Configuration
+datasets:
+  # ABIDE I Configuration
+  abide1:
+    enabled: true
+    data_dir: "data/ABIDE1"
+    output_dir: "data/processed/ABIDE1"
+    
+    # Available derivatives
+    derivatives:
+      - "cc200"      # 200 ROI connectivity
+      - "aal"        # AAL atlas connectivity
+      - "ez"         # EZ atlas connectivity
+      - "ho"         # Harvard-Oxford atlas
+      - "tt"         # Talairach-Tournoux atlas
+      - "dosenbach160" # Dosenbach 160 ROI
+    
+    # Preprocessing pipeline
+    pipeline: "cpac"
+    strategy: "filt_global"
+    
+    # Data splits
+    train_split: 0.7
+    val_split: 0.15
+    test_split: 0.15
+    
+    # Cross-validation
+    n_folds: 10
+    random_state: 42
+    
+    # Quality control
+    min_fd: 0.2  # Maximum framewise displacement
+    min_timepoints: 100  # Minimum number of timepoints
+    
+  # ABIDE II Configuration
+  abide2:
+    enabled: true
+    data_dir: "data/ABIDE2"
+    output_dir: "data/processed/ABIDE2"
+    
+    # fMRI configuration
+    fmri:
+      input_dim: 40000
+      preprocessing: "fmriprep"
+      connectivity_method: "correlation"
+      
+    # Microbiome configuration
+    microbiome:
+      input_dim: 2503
+      preprocessing: "qiime2"
+      feature_selection: "variance_threshold"
+      
+      # QIIME2 processing options
+      qiime2:
+        normalization: "relative_abundance"  # "relative_abundance", "clr", "none"
+        transformation: "log"  # "log", "sqrt", "none"
+        variance_threshold: 0.01
+        feature_selection: true
+        handle_missing: "fill_zero"  # "fill_zero", "drop", "impute"
+      
+    # Data splits
+    train_split: 0.7
+    val_split: 0.15
+    test_split: 0.15
+    
+    # Cross-validation
+    n_folds: 5
+    loso_validation: true
+    
+  # Combined dataset configuration
+  combined:
+    enabled: false
+    output_dir: "data/processed/combined"
+    
+    # Combination strategy
+    strategy: "concatenate"  # "concatenate", "ensemble", "fusion"
+    
+    # Weighting
+    abide1_weight: 0.5
+    abide2_weight: 0.5
+
+# Data Loading Configuration
+data_loading:
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  shuffle: true
+  
+  # Data augmentation
+  augmentation:
+    enabled: true
+    noise_std: 0.01
+    dropout_rate: 0.1
+    rotation_angle: 5.0
+    
+  # Preprocessing
+  preprocessing:
+    normalization: "zscore"  # "zscore", "minmax", "robust"
+    feature_scaling: true
+    outlier_removal: true
+    missing_value_strategy: "mean"  # "mean", "median", "drop"
+
+# Quality Control
+quality_control:
+  # Data quality thresholds
+  min_samples_per_class: 10
+  max_missing_ratio: 0.1
+  min_correlation: 0.1
+  max_correlation: 0.95
+  
+  # Outlier detection
+  outlier_detection:
+    method: "isolation_forest"  # "isolation_forest", "lof", "elliptic_envelope"
+    contamination: 0.1
+    
+  # Data validation
+  validation:
+    check_nan: true
+    check_inf: true
+    check_duplicates: true
+    check_balance: true
+
+# Storage Configuration
+storage:
+  # File formats
+  format: "hdf5"  # "hdf5", "numpy", "pickle"
+  compression: "gzip"
+  compression_opts: 9
+  
+  # Caching
+  cache_enabled: true
+  cache_dir: "cache"
+  cache_size: "1GB"
+  
+  # Backup
+  backup_enabled: true
+  backup_dir: "backups"
+  backup_frequency: "daily"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  file: "data_processing.log"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # Progress tracking
+  progress_bar: true
+  log_interval: 100 

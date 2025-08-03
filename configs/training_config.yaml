@@ -1,0 +1,144 @@
+# SynapseBiome ASD-Net Training Configuration
+
+# Model Configuration
+model:
+  # Input dimensions
+  fmri_input_dim: 40000
+  microbiome_input_dim: 2503
+  contrastive_feat_dim: 256
+  num_classes: 2
+  
+  # fMRI GNN parameters
+  num_nodes: 200
+  feature_dim: 16
+  gnn_hidden_dims: [128, 256, 512]
+  num_heads: [8, 4, 1]
+  
+  # Microbiome MLP parameters
+  mlp_hidden_dims: [2048, 1024, 512]
+  sparsity_lambda: 0.01
+  activation: "gelu"
+  
+  # General parameters
+  dropout: 0.3
+  contrastive_dropout: 0.3
+  freeze_base_models: true
+
+# Training Configuration
+training:
+  # Training phases
+  phases:
+    - name: "pretrain"
+      epochs: 50
+      learning_rate: 1e-4
+      batch_size: 32
+      description: "Pretrain base models separately"
+    
+    - name: "contrastive"
+      epochs: 100
+      learning_rate: 5e-5
+      batch_size: 32
+      description: "Contrastive learning phase"
+    
+    - name: "finetune"
+      epochs: 25
+      learning_rate: 1e-5
+      batch_size: 32
+      description: "Fine-tune entire model"
+  
+  # Loss weights
+  contrastive_weight: 1.0
+  classification_weight: 1.0
+  
+  # Contrastive learning parameters
+  contrastive_temperature: 0.07
+  hard_neg_ratio: 0.2
+  triplet_margin: 0.5
+  
+  # Optimization
+  optimizer: "adam"
+  weight_decay: 1e-5
+  scheduler: "cosine"
+  warmup_epochs: 5
+  
+  # Regularization
+  gradient_clip: 1.0
+  early_stopping_patience: 15
+
+# Data Configuration
+data:
+  # Data splits
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  
+  # Data loading
+  batch_size: 32
+  num_workers: 4
+  pin_memory: true
+  
+  # Data augmentation
+  augmentation:
+    enabled: true
+    noise_std: 0.01
+    dropout_rate: 0.1
+  
+  # Cross-validation
+  cross_validation:
+    enabled: true
+    n_folds: 5
+    loso_validation: true
+
+# Evaluation Configuration
+evaluation:
+  # Metrics
+  metrics: ["accuracy", "sensitivity", "specificity", "auc", "f1"]
+  
+  # Statistical testing
+  statistical_testing: true
+  confidence_interval: 0.95
+  
+  # Biomarker analysis
+  biomarker_analysis:
+    enabled: true
+    top_k_features: 50
+    visualization: true
+
+# Logging and Output
+logging:
+  # Logging frequency
+  log_interval: 10
+  eval_interval: 1
+  
+  # TensorBoard
+  tensorboard: true
+  tensorboard_dir: "runs"
+  
+  # Model checkpointing
+  save_interval: 5
+  save_best_only: true
+  max_checkpoints: 3
+  
+  # Output directories
+  output_dir: "outputs"
+  model_dir: "models"
+  results_dir: "results"
+
+# Hardware Configuration
+hardware:
+  # Device
+  device: "auto"  # "auto", "cuda", "cpu"
+  gpu_ids: [0]
+  
+  # Mixed precision
+  mixed_precision: true
+  
+  # Memory optimization
+  gradient_accumulation_steps: 1
+  max_memory_usage: 0.9
+
+# Reproducibility
+reproducibility:
+  seed: 42
+  deterministic: true
+  benchmark: false 
