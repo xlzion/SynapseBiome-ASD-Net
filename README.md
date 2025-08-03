@@ -235,19 +235,48 @@ The framework supports both ABIDE I and ABIDE II datasets. Follow these steps:
    python scripts/download_abide1.py --process_only --derivatives rois_cc200 rois_aal rois_ez
    ```
 
+3. **Download only (skip processing)**:
+   ```bash
+   python scripts/download_abide1.py --download_only --derivatives rois_cc200 rois_aal rois_ez
+   ```
+
+4. **Custom derivatives and preprocessing**:
+   ```bash
+   python scripts/download_abide1.py \
+       --derivatives rois_cc200 rois_aal rois_ez rois_ho rois_tt \
+       --pipeline cpac \
+       --strategy filt_global \
+       --data_dir data/ABIDE1 \
+       --output_dir data/processed/ABIDE1
+   ```
+
 #### ABIDE II Dataset
 
-1. **Download ABIDE-II data**:
+1. **Download and process ABIDE II data**:
    ```bash
    python scripts/download_abide2.py
    ```
 
-2. **Preprocess fMRI data**:
+2. **Process with microbiome data**:
+   ```bash
+   # With BIOM file
+   python scripts/download_abide2.py --biom_file data/feature_table.biom
+   
+   # With CSV file
+   python scripts/download_abide2.py --csv_file data/microbiome_data.csv
+   ```
+
+3. **Process only (if data already downloaded)**:
+   ```bash
+   python scripts/download_abide2.py --process_only
+   ```
+
+4. **Preprocess fMRI data separately**:
    ```bash
    python scripts/preprocess_fmri.py --input_dir data/ABIDE2 --output_dir data/processed
    ```
 
-3. **Process microbiome data from QIIME2**:
+5. **Process microbiome data from QIIME2**:
    ```bash
    # Process BIOM file from QIIME2
    python scripts/process_microbiome.py --biom_file data/feature_table.biom --output_dir data/processed/microbiome
@@ -287,17 +316,28 @@ combined_path = processor.combine_datasets(abide1_path, fmri_path, microbiome_pa
 ### Data Format
 
 #### ABIDE I
-- **fMRI Data**: Connectivity matrices from multiple atlases (CC200, AAL, EZ, etc.)
+- **fMRI Data**: Connectivity matrices from multiple atlases (CC200, AAL, EZ, HO, TT, etc.)
+- **Available Derivatives**: 
+  - `rois_cc200`: 200-region connectivity matrix
+  - `rois_aal`: 116-region AAL atlas connectivity
+  - `rois_ez`: 264-region EZ atlas connectivity
+  - `rois_ho`: 112-region Harvard-Oxford atlas connectivity
+  - `rois_tt`: 97-region Talairach-Tournoux atlas connectivity
 - **Data Format**: HDF5 files with patient metadata and functional connectivity
 - **Labels**: Binary classification (0: TD, 1: ASD)
+- **Preprocessing**: CPAC pipeline with multiple strategies (filt_global, filt_noglobal, etc.)
 
 #### ABIDE II
 - **fMRI Data**: 40,000-dimensional connectivity vectors (`.npy` format)
 - **Microbiome Data**: 2,503-dimensional feature vectors (`.csv` format)
+- **Available Pipelines**: FMRIPrep, CPAC, custom preprocessing
 - **Labels**: Binary classification (0: TD, 1: ASD)
+- **Data Sources**: S3 bucket access for fMRI data, QIIME2 for microbiome data
 
 #### Combined Dataset
 - **Format**: HDF5 files with both ABIDE I and ABIDE II data
+- **Integration**: Multi-modal fusion of fMRI and microbiome features
+- **Cross-validation**: Leave-one-site-out (LOSO) validation strategy
 - **Structure**: Organized by dataset, patient, and modality
 
 ## 🎯 Model Training
